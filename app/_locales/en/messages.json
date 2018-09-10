@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "TLEOI - Points Adjuster",
+    "description": "The name of the application"
+  },
+  "appShortName": {
+    "message": "TLOEI Pt Adj",
+    "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
+  },
+  "appDescription": {
+    "message": "This extension adds proper scoring adjustments on the quick box matchup page on ESPN for TLOEI.",
+    "description": "The description of the application"
+  }
+}

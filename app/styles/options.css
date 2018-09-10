@@ -1,0 +1,29 @@
+.container {
+  align-items: center;
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.options {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 0.5rem;
+  text-align: right;
+}
+
+label {
+  user-select: none;
+}
+
+input {
+  width: 3rem;
+}
+
+.footer {
+  justify-items: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 1rem;
+}

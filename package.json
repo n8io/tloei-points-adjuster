@@ -1,0 +1,12 @@
+{
+  "name": "The-League-of-Extraordinary-Idiots-Points-Adjuster",
+  "version": "0.0.1",
+  "description": "This extension automatically makes the proper scoring adjustments on the quick box matchup page on ESPN for members of the League of Extraordinary Idiots.",
+  "scripts": {
+    "dev": "webextension-toolbox dev",
+    "build": "webextension-toolbox build"
+  },
+  "devDependencies": {
+    "webextension-toolbox": "latest"
+  }
+}
