@@ -1,12 +1,15 @@
 {
   "name": "The-League-of-Extraordinary-Idiots-Points-Adjuster",
-  "version": "0.0.1",
-  "description": "This extension automatically makes the proper scoring adjustments on the quick box matchup page on ESPN for members of the League of Extraordinary Idiots.",
+  "version": "1.2.6",
+  "description": "This extension adds the TLOEI missing scoring adjustments for ESPN fantasy football",
   "scripts": {
     "dev": "webextension-toolbox dev",
     "build": "webextension-toolbox build"
   },
   "devDependencies": {
     "webextension-toolbox": "latest"
+  },
+  "dependencies": {
+    "debug": "^4.0.1"
   }
 }

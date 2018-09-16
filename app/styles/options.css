@@ -17,8 +17,9 @@ label {
   user-select: none;
 }
 
-input {
-  width: 3rem;
+input,
+select {
+  width: 4rem;
 }
 
 .footer {

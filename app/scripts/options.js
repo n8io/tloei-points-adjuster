@@ -1,4 +1,5 @@
 const settings = chrome.storage.sync;
+const manifest = chrome.runtime.getManifest();
 
 const getElement = selector => document.querySelector(selector);
 
@@ -11,7 +12,7 @@ const setInputValue = ({ key, value }) => {
 };
 
 const loadOptions = () => {
-  const keys = ['tePprBonus'];
+  const keys = ['leagueId', 'pI10Bonus', 'teamId', 'tePprBonus'];
 
   keys.forEach(key =>
     loadOption(
@@ -29,42 +30,32 @@ const saveOptions = options => {
 
     const status = getElement('#status');
 
+    status.setAttribute('title', manifest.version);
+
     status.textContent = '✅ Options saved';
 
     setTimeout(function() {
-      status.textContent = ' ';
+      status.textContent = `🏆 ${status.getAttribute('title')}`;
     }, 750);
   });
 };
 
 const onSave = () => {
+  const leagueId = Number(getElement('#leagueId').value);
+  const pI10Bonus = Number(getElement('#pI10Bonus').value);
+  const teamId = Number(getElement('#teamId').value);
   const tePprBonus = Number(getElement('#tePprBonus').value);
 
-  saveOptions({ tePprBonus });
+  saveOptions({ leagueId, pI10Bonus, teamId, tePprBonus });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
   loadOptions();
 
+  const status = getElement('#status');
+
+  status.setAttribute('title', manifest.version);
+  status.innerText = `🏆 ${status.getAttribute('title')}`;
+
   getElement('#saveBtn').addEventListener('click', onSave);
 });
-
-// {
-//   loadOptions();
-
-//   chrome.storage.sync.get('tePprBonus', data => {
-
-//     console.log({ tePprBonus });
-
-//     tePprBonusInput.value = tePprBonus;
-
-//     tePprBonusInput.addEventListener(
-//       'change',
-//       ({ target: { value } }) => {
-//         chrome.storage.sync.set({ tePprBonus: value }, () => {
-//           console.log('The tePointPerReception is set to ' + value);
-//         });
-//       }
-//     );
-//   });
-// });

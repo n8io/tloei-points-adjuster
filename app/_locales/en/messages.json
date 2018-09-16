@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "TLEOI - Points Adjuster",
+    "message": "TLOEI - Points Adjuster",
     "description": "The name of the application"
   },
   "appShortName": {
@@ -8,7 +8,7 @@
     "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
   },
   "appDescription": {
-    "message": "This extension adds proper scoring adjustments on the quick box matchup page on ESPN for TLOEI.",
+    "message": "This extension adds the TLOEI missing scoring adjustments for ESPN fantasy football",
     "description": "The description of the application"
   }
 }
