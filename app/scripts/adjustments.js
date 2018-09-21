@@ -4,7 +4,7 @@ import debug from 'debug';
   let configuration = {};
 
   const Fetch = {
-    element: url =>
+    element: async url =>
       Fetch.text(url).then(html => {
         if (!html) return null;
 
@@ -35,9 +35,11 @@ import debug from 'debug';
 
       return fetch(url)
         .then(async r => {
-          log(`Fetched text from url`, { url, text: await r.text() });
+          const text = r.text();
 
-          return r.text();
+          log(`Fetched text from url`, { url, text });
+
+          return text;
         })
         .catch(() => '');
     }
@@ -72,7 +74,13 @@ import debug from 'debug';
       const parsePunts = str => {
         const log = debug('tloei:parse:puntsInside10:parsePunts');
         const reg = /([a-z][.][a-z-']+) .*yards to [a-z]{2,3} ([0-9]+)/gi;
-        const [, name, tmpYL] = reg.exec(str);
+        const matches = reg.exec(str);
+
+        if (!matches) {
+          return null;
+        }
+
+        const [, name, tmpYL] = matches;
         const yardLine = Number(tmpYL);
 
         const output = { name: name.toUpperCase(), yardLine };
@@ -84,12 +92,16 @@ import debug from 'debug';
 
       const PUNT_PLAY_RESULT = 'Punt';
 
-      const drives = Object.keys(tmpDrives)
-        .reduce((acc, key) => [...acc, tmpDrives[key]], [])
-        .filter(d => d.result === PUNT_PLAY_RESULT)
-        .map(d => d.plays[Object.keys(d.plays).slice(-1)[0]].desc)
-        .map(parsePunts)
-        .filter(({ yardLine }) => yardLine < 10);
+      let drives = [];
+
+      try {
+        drives = Object.keys(tmpDrives)
+          .reduce((acc, key) => [...acc, tmpDrives[key]], [])
+          .filter(d => d.result === PUNT_PLAY_RESULT)
+          .map(d => d.plays[Object.keys(d.plays).slice(-1)[0]].desc)
+          .map(parsePunts)
+          .filter(({ yardLine }) => yardLine < 10);
+      } catch (e) {}
 
       const log = debug('tloei:parse:puntsInside10');
 
@@ -154,7 +166,11 @@ import debug from 'debug';
 
       const puntsInside10 = Parse.puntsInside10(gameData);
 
-      log({ puntsInside10 });
+      log(puntsInside10);
+
+      if (!puntsInside10) {
+        return { i10Bonus: 0 };
+      }
 
       const i10Punts = puntsInside10.filter(
         pit => pit.name.toLowerCase() === name.toLowerCase()
@@ -181,7 +197,7 @@ import debug from 'debug';
       if (!teDocument) {
         log(`Could not find TE info`, { url: url.href });
 
-        return 0;
+        return null;
       }
 
       const statMap = [
@@ -217,15 +233,20 @@ import debug from 'debug';
 
       if (week === 1 && weeks[week].points) return 0;
 
-      const total = thisWeek.receptions * bonus;
+      const total = thisWeek.receptions * bonus + thisWeek.points;
 
-      log({ teReceptionBonus: total });
+      log({ teBonus: thisWeek.receptions * bonus, tePoints: total });
 
-      return total;
+      return { total, bonus: thisWeek.receptions * bonus, points: total };
     }
   };
 
   const Dom = {
+    getQSParam: param => {
+      const url = new URL(window.location.href);
+
+      return url.searchParams.get(param);
+    },
     punters: () =>
       [...document.querySelectorAll('.slot_18.playerSlot')].map(el => {
         const id = Number(el.getAttribute('id').replace(/[^0-9]+/, ''));
@@ -321,8 +342,8 @@ import debug from 'debug';
 
       playerPointEl.innerText = `🏆 ${points}`;
     },
-    updateTePoints: ({ playerId, points }) => {
-      if (!points) return;
+    updateTePoints: ({ playerId, bonus, points }) => {
+      if (!bonus) return;
 
       const playerPointEl = document.querySelector(
         `#plAppliedPoints_${playerId}`
@@ -397,6 +418,14 @@ import debug from 'debug';
     },
     init: async () => {
       const log = debug('tloei:process:start');
+      const qsLeagueId = Number(Dom.getQSParam('leagueId'));
+      const { leagueId } = configuration;
+
+      if (qsLeagueId !== leagueId) {
+        log(`LeagueId mismatch: ${qsLeagueId} !== ${leagueId}`);
+
+        return;
+      }
 
       if (await Dom.hasScoringAdjustments()) {
         log(`Scoring adjustments detected. No further processing`);
@@ -416,16 +445,17 @@ import debug from 'debug';
       const { tePprBonus: TE_RECEPTION_BONUS = 12 } = configuration;
 
       return Dom.teIds().forEach(async (playerId, teamIdIndex) => {
-        const bonus = await Te.receptionPoints(
-          playerId,
-          Dom.week(),
-          Dom.seasonId(),
-          TE_RECEPTION_BONUS
-        );
+        const { bonus, points } =
+          (await Te.receptionPoints(
+            playerId,
+            Dom.week(),
+            Dom.seasonId(),
+            TE_RECEPTION_BONUS
+          )) || {};
 
-        log({ playerId, teBonus: bonus });
+        log({ playerId, tePoints: points, teBonus: bonus });
 
-        await Dom.updateTePoints({ playerId, points: bonus });
+        await Dom.updateTePoints({ playerId, bonus, points });
 
         await Dom.updateTotalPoints({
           teamId: Dom.teamIds()[teamIdIndex],
@@ -438,9 +468,10 @@ import debug from 'debug';
 
   const TE_PPR_BONUS_KEY = 'tePprBonus';
   const P_I10_BONUS_KEY = 'pI10Bonus';
+  const LEAGUE_ID_KEY = 'leagueId';
 
   chrome.storage.sync.get(
-    ({ [TE_PPR_BONUS_KEY]: '', [P_I10_BONUS_KEY]: '' },
+    ({ [LEAGUE_ID_KEY]: '', [P_I10_BONUS_KEY]: '', [TE_PPR_BONUS_KEY]: '' },
     config => {
       const log = debug('tloei:chrome:storage');
       configuration = config;
