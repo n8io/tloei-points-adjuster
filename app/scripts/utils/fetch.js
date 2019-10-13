@@ -1,0 +1,3 @@
+const json = (url, options) => fetch(url, options).then(r => r.json());
+
+export { json };

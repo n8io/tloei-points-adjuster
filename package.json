@@ -1,6 +1,6 @@
 {
   "name": "The-League-of-Extraordinary-Idiots-Points-Adjuster",
-  "version": "1.2.9",
+  "version": "2.0.0",
   "description": "This extension adds the TLOEI missing scoring adjustments for ESPN fantasy football",
   "scripts": {
     "dev": "webextension-toolbox dev",
@@ -10,6 +10,7 @@
     "webextension-toolbox": "latest"
   },
   "dependencies": {
-    "debug": "^4.0.1"
+    "debug": "^4.0.1",
+    "ramda": "^0.26.1"
   }
 }
