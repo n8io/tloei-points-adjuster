@@ -1,4 +1,17 @@
-import { flatten, pipe, prop, propEq, __ } from 'ramda';
+import {
+  anyPass,
+  filter,
+  flatten,
+  gt,
+  intersection,
+  length,
+  map,
+  pipe,
+  prop,
+  propEq,
+  values,
+  __
+} from 'ramda';
 import { Bonus } from '../bonus';
 import { Player } from '../player';
 import { Stat } from '../stat';
@@ -30,13 +43,20 @@ const processPlayer = player => {
 };
 
 export const adjustments = settings => players => {
-  const lineSlotIdMap = Stat.map(settings);
-  const isTe = pipe(
-    prop('lineupSlotId'),
-    prop(__, lineSlotIdMap),
-    propEq('abbrev', 'TE')
+  const tePositions = pipe(
+    values,
+    filter(anyPass([propEq('abbrev', 'TE')])),
+    map(prop('id'))
+  )(settings.constants.lineupSlotsMap);
+
+  const isTE = pipe(
+    prop('eligibleSlots'),
+    intersection(tePositions),
+    length,
+    gt(__, 0)
   );
-  const tes = players.filter(isTe);
+
+  const tes = players.filter(isTE);
   const bonuses = tes.map(processPlayer);
 
   return flatten(bonuses);
