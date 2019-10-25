@@ -50,6 +50,7 @@ const apiToUi = pick([
 ]);
 
 const clearPlayerAdjustments = () => {
+  // console.log('Clearing previous player adjustments...');
   document
     .querySelectorAll('div[adjustment]')
     .forEach(e => e.parentNode.removeChild(e));
@@ -57,7 +58,7 @@ const clearPlayerAdjustments = () => {
 
 const boxScoreUpdate = ({ el, bonus, grossTotal }) => {
   const td = el.closest('td');
-  const scoreTd = td.parentElement.querySelector('[title="Fantasy Points"]');
+  const scoreTd = td.parentNode.querySelector('td:nth-child(6)');
 
   if (!scoreTd) return;
 
@@ -67,9 +68,11 @@ const boxScoreUpdate = ({ el, bonus, grossTotal }) => {
 };
 
 const fantasyCastUpdate = ({ el, bonus, grossTotal }) => {
-  const td = el.closest('.Table2__td');
-  const isReverse = td.classList.contains('reverse');
+  const td = el.closest('td');
+  const tr = td.parentNode;
+  const isReverse = tr.children.item(0) !== td;
   let scoreTd = null;
+  const isEven = !Boolean(parseInt(tr.getAttribute('data-idx'), 10) % 2);
 
   if (isReverse) {
     scoreTd = td.previousSibling;
@@ -77,17 +80,16 @@ const fantasyCastUpdate = ({ el, bonus, grossTotal }) => {
     scoreTd = td.nextSibling;
   }
 
-  scoreTd.setAttribute(
-    'style',
-    `
-      align-items: center;
-      display: grid;
-      grid-auto-flow: column;
-      height: 50px;
-      justify-content: ${isReverse ? 'start' : 'end'};
-      max-width: 100%;
-    `
-  );
+  if (!scoreTd) {
+    console.error({
+      td,
+      tr,
+      isReverse,
+      isEven
+    });
+  }
+
+  scoreTd.setAttribute('style', `position: relative;`);
 
   const previousAdjustments = [...scoreTd.querySelectorAll('div[adjustment]')];
 
@@ -99,8 +101,15 @@ const fantasyCastUpdate = ({ el, bonus, grossTotal }) => {
   adjEl.setAttribute(
     'style',
     `
+      background: ${isEven ? '#FFF' : '#FAFAFA'};
+      color: #797B7D;
       font-size: 14px;
-      opacity: 0.5;
+      font-weight: 700;
+      line-height: 16px;
+      position: absolute;
+      ${isReverse ? 'left: 0.75rem;' : 'right: 0.75rem;'}
+      top: 50%;
+      transform: translateY(-50%);
     `
   );
   adjEl.innerText = parseScore(bonus + grossTotal);
@@ -116,7 +125,9 @@ const setPlayerScore = (adjustments, scoreType = ScoreType.FANTASY_CAST) => ({
   const bonus = adjustments
     .filter(adj => adj.player.id === player.id)
     .reduce((acc, adj) => acc + adj.bonus, 0);
-  const playerImg = document.body.querySelector(`img[src*="${player.id}.png"]`);
+  const playerImg = document.body.querySelector(
+    `img[src*="/${player.id}.png"]`
+  );
 
   if (scoreType === ScoreType.FANTASY_CAST) {
     fantasyCastUpdate({
