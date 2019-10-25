@@ -16,7 +16,7 @@ const updateTeamBoxScoreTotal = ({ bonus, isAway, grossTotal }) => {
   const scoreTd = isAway ? awayScore.childNodes[0] : homeScore.childNodes[0];
   const HOME_FIELD_ADVANTAGE_BONUS = 1;
   const netBonus = parseScore(
-    bonus + +(isAway ? 0 : HOME_FIELD_ADVANTAGE_BONUS)
+    bonus + (isAway ? 0 : HOME_FIELD_ADVANTAGE_BONUS)
   );
   const total = parseScore(netBonus + grossTotal);
 
@@ -27,6 +27,22 @@ const updateTeamBoxScoreTotal = ({ bonus, isAway, grossTotal }) => {
   );
 
   scoreTd.innerText = total;
+
+  const [spanTotalAway, spanTotalHome] = [
+    ...document.body.querySelectorAll('.team-score')
+  ];
+  const checkTotal = isAway ? spanTotalAway : spanTotalHome;
+  const espnTotal = parseScore(checkTotal.innerText);
+
+  if (espnTotal !== total) {
+    const diff = espnTotal - total;
+    const isPositive = diff > 0;
+    console.warn(
+      `ESPN scoreboard has been changed from ${total} to ${espnTotal} (${parseScore(
+        isPositive ? `+${diff}` : diff
+      )})`
+    );
+  }
 };
 
 const updateTeamFantasyCastTotal = ({ bonus, isAway, grossTotal }) => {

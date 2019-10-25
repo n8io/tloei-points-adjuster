@@ -16,8 +16,6 @@ const updateScores = async ({ settings, weekId }) => {
     matchups
   });
 
-  console.info({ lineupSlotsMap: settings.constants.lineupSlotsMap });
-
   Player.clearPlayerAdjustments();
 
   const aAdjuster = Player.setPlayerScore(
