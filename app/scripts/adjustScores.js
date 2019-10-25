@@ -1,6 +1,7 @@
 import { Adjustment } from './types/adjustment';
 import { start as startBoxScore } from './boxscore';
 import { start as startFantasyCast } from './fantasycast';
+import { isSuperAdmin } from './types/featuresFlags';
 
 const timeouts = {};
 
@@ -14,7 +15,11 @@ const determineAdjustmentType = () => {
   return Adjustment.UNKNOWN;
 };
 
-const init = () => {
+const init = async () => {
+  const isSA = await isSuperAdmin();
+
+  if (isSA) console.log('Super admin enabled');
+
   Object.values(timeouts).map(clearInterval);
 
   switch (determineAdjustmentType()) {
