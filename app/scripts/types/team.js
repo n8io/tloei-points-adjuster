@@ -1,18 +1,20 @@
-import { ScoreType } from './scoreType';
-import { parseScore } from '../utils/parseScore';
+import { ScoreType } from "./scoreType";
+import { parseScore } from "../utils/parseScore";
 
 const homeFieldBonus = () =>
   parseInt(
-    [...document.body.querySelectorAll('td.additional-scores-label')].find(
-      el => el.innerText === 'Home Field Advantage'
+    [...document.body.querySelectorAll("td.additional-scores-label")].find(
+      (el) => el.innerText === "Home Field Advantage"
     ).previousSibling.innerText,
     10
   );
 
 const updateTeamBoxScoreTotal = ({ bonus, isAway, grossTotal }) => {
-  const [, , , awayScore, , , , homeScore] = [
-    ...document.body.querySelectorAll('.total-col.tar')
-  ];
+  const AWAY_SCORE_CELL_INDEX = 3;
+  const HOME_SCORE_CELL_INDEX = 11;
+  const rows = [...document.body.querySelectorAll(".total-col.tar")];
+  const awayScore = rows[AWAY_SCORE_CELL_INDEX];
+  const homeScore = rows[HOME_SCORE_CELL_INDEX];
   const scoreTd = isAway ? awayScore.childNodes[0] : homeScore.childNodes[0];
   const HOME_FIELD_ADVANTAGE_BONUS = 1;
   const netBonus = parseScore(
@@ -22,14 +24,14 @@ const updateTeamBoxScoreTotal = ({ bonus, isAway, grossTotal }) => {
 
   console.info(
     `Setting ${
-      isAway ? 'away' : 'home'
+      isAway ? "away" : "home"
     } team box score total to ${total} (${netBonus} in adjustments)`
   );
 
   scoreTd.innerText = total;
 
   const [spanTotalAway, spanTotalHome] = [
-    ...document.body.querySelectorAll('.team-score')
+    ...document.body.querySelectorAll(".team-score"),
   ];
   const checkTotal = isAway ? spanTotalAway : spanTotalHome;
   const espnTotal = parseScore(checkTotal.innerText);
@@ -46,9 +48,9 @@ const updateTeamBoxScoreTotal = ({ bonus, isAway, grossTotal }) => {
 };
 
 const updateTeamFantasyCastTotal = ({ bonus, isAway, grossTotal }) => {
-  const totalTr = document.body.querySelector('tr.total-row');
+  const totalTr = document.body.querySelector("tr.total-row");
   const [awayScore, homeScore] = [
-    ...totalTr.querySelectorAll('td[colspan="2"] div')
+    ...totalTr.querySelectorAll('td[colspan="2"] div'),
   ];
   const scoreTd = isAway ? awayScore : homeScore;
   const netBonus = parseScore(bonus + +(isAway ? 0 : homeFieldBonus()));
@@ -56,7 +58,7 @@ const updateTeamFantasyCastTotal = ({ bonus, isAway, grossTotal }) => {
 
   console.info(
     `Setting ${
-      isAway ? 'away' : 'home'
+      isAway ? "away" : "home"
     } team fantasy cast score total to ${total} (${netBonus} in adjustments)`
   );
 
@@ -66,13 +68,13 @@ const updateTeamFantasyCastTotal = ({ bonus, isAway, grossTotal }) => {
 const setTeamScore = ({ isAway, scoreType, team }) => {
   const functionMap = {
     [ScoreType.BOX_SCORE]: updateTeamBoxScoreTotal,
-    [ScoreType.FANTASY_CAST]: updateTeamFantasyCastTotal
+    [ScoreType.FANTASY_CAST]: updateTeamFantasyCastTotal,
   };
 
   functionMap[scoreType]({
     bonus: team.totalAdjustment,
     isAway,
-    grossTotal: team.totalPointsRaw
+    grossTotal: team.totalPointsRaw,
   });
 };
 
@@ -82,5 +84,5 @@ const setTeamScores = ({ matchup, scoreType = ScoreType.FANTASY_CAST }) => {
 };
 
 export const Team = {
-  setTeamScores
+  setTeamScores,
 };
